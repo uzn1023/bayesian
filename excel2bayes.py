@@ -17,11 +17,16 @@ inputs_name = []
 outputs = []
 outputs_name = []
 for i, column in enumerate(columns):
-    if column[1] == "i":
+    if column[1] == "d":
         inputs_name.append(column[0])
         inputs.append(column[5:])
-        inputs_numtype.append(column[2])
-        inputs_domain.append([float(column[3]),float(column[4])])
+        inputs_numtype.append(column[1])
+        inputs_domain.append(np.arange(float(column[2]), float(column[3]), float(column[4])))
+    if column[1] == "io":
+        inputs_name.append(column[0])
+        inputs.append(column[5:])
+        inputs_numtype.append(column[1])
+        inputs_domain.append([int(column[2]), int(column[3])])
     if column[1] == "o":
         outputs_name.append(column[0])
         outputs.append(column[5:])
@@ -31,7 +36,7 @@ initial_x = np.array(inputs).T
 initial_y = np.array(outputs[0])
 
 initial_y = initial_y.reshape((-1,1))
-print(initial_x)
+#print(initial_x)
 
 def f(x):
     print("next x")
@@ -44,9 +49,9 @@ bounds = []
 for i,input_name in enumerate(inputs_name):
     bound = {}
     bound["name"] = input_name
-    if inputs_numtype[i] == "c":
-        bound["type"] = "continuous"
-    elif inputs_numtype[i] == "d":
+    if inputs_numtype[i] == "d":
+        bound["type"] = "discrete"
+    elif inputs_numtype[i] == "io":
         bound["type"] = "discrete"
     bound["domain"] = tuple(inputs_domain[i])
     
@@ -61,6 +66,4 @@ myBopt = GPyOpt.methods.BayesianOptimization(f=f,
                                              acquisition_type='LCB',               
                                              )
 
-
-for i in range(30):#このfor文は人間が回す
-    myBopt.run_optimization(max_iter=1)
+myBopt.run_optimization(max_iter=100)
